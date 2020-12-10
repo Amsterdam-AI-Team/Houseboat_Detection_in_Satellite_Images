@@ -8,9 +8,9 @@ COLOR_WHITE = [255, 255, 255]
 IMAGES_OUTPUT = "satellite_masks/"
 ZOOM_LEVEL = "13"
 
-# Zip files with X folder and Y file structure, similar to:
+# Zip files with X folder and Y file structure, similar to the structure on:
 # https://t1.data.amsterdam.nl/topo_RD/13/
-ZIP_FILE_LUFO = zipfile.ZipFile("images_lufo_2020.zip")
+ZIP_FILE_LUFO = zipfile.ZipFile("images_lufo_2020_water_only.zip")
 ZIP_FILE_TOPO = zipfile.ZipFile("images_topo_2020.zip")
 
 def main():
@@ -61,7 +61,7 @@ def main():
 
                 # One image has 65536 pixels. If 20000 white pixels or more found, skip
                 if n_white_pixels < 20000:
-                    # For example a file with name "13_3700_4220.jpeg"
+                    # For example an output file with name "13_3700_4220.jpeg"
                     cv2.imwrite(os.path.join(IMAGES_OUTPUT, ZOOM_LEVEL + "_" + name.split("/")[0] + "_" + filename + ".jpeg"), img_overlay)
 
 if __name__ == "__main__":
