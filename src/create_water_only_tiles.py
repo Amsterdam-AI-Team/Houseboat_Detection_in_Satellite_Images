@@ -18,10 +18,16 @@ thresh_perc_white = 0.30
 COLOR_BLACK = [0, 0, 0]
 COLOR_WHITE = [255, 255, 255]
 
+
 def create_water_only_tiles(in_folder_lufo, in_folder_topo, out_folder):
-    """ Filter out bodies of water, because houseboats will (almost) always occur on water. """
-    for lufo_filepath in glob.glob(in_folder_lufo + '**/*.jpeg', recursive=True):
-        base_filepath = os.path.splitext(lufo_filepath.split(in_folder_lufo)[-1])[0]
+    """
+    Filter out bodies of water, because houseboats will (almost) always
+    occur on water.
+    """
+    for lufo_filepath in glob.glob(in_folder_lufo + '**/*.jpeg',
+                                   recursive=True):
+        base_filepath = os.path.splitext(lufo_filepath
+                                         .split(in_folder_lufo)[-1])[0]
 
         topo_filepath = in_folder_topo + base_filepath + ".png"
 
@@ -50,9 +56,10 @@ def create_water_only_tiles(in_folder_lufo, in_folder_topo, out_folder):
                 res[:, :, :3][~mask] = COLOR_BLACK
                 res[:, :, :3][mask] = COLOR_WHITE
 
-                # Overlay the black and white mask image with the satellite image
+                # Overlay the black and white mask image with the aerial image
                 img2gray = cv2.cvtColor(res, cv2.COLOR_BGR2GRAY)
-                img_overlay = cv2.bitwise_and(img_lufo, img_lufo, mask=img2gray)            
+                img_overlay = cv2.bitwise_and(img_lufo, img_lufo,
+                                              mask=img2gray)
 
                 # Save the overlayed image
                 save_path = os.path.join(out_folder, base_filepath + ".jpeg")

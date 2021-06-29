@@ -1,18 +1,16 @@
 import os
 import numpy as np
 from PIL import Image, ImageDraw
-from shapely.geometry import Polygon
 import csv
 from collections import defaultdict
-import time
-import pandas as pd
-import cv2
 
-DIM_PIXELS = 256 # The width and height value at zoom level 13
+DIM_PIXELS = 256  # The width and height value at zoom level 13
 
-def group_by_tile(input_file):
+
+def _group_by_tile(input_file):
     """ Group csv data by column 'tile_z_x_y' (also known as the filename) """
-    grouped_tiles = defaultdict(list)  # each entry of the dict is, by default, an empty list
+    # each entry of the dict is, by default, an empty list
+    grouped_tiles = defaultdict(list)
 
     with open(input_file, "r") as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
@@ -21,6 +19,7 @@ def group_by_tile(input_file):
             grouped_tiles[row[0]].append(row[1])
 
     return grouped_tiles
+
 
 def draw_binary_mask(in_file, out_folder_masks):
     """ Draw binary polygon mask of detected instances """
@@ -32,17 +31,18 @@ def draw_binary_mask(in_file, out_folder_masks):
         print("Output folder already exists.")
 
     # Draw binary masks to validate the quality of the predictions
-    grouped_tiles = group_by_tile(in_file)
+    grouped_tiles = _group_by_tile(in_file)
 
     for key in grouped_tiles:
         # Create a new image with a white background
-        img = Image.new('RGB', (DIM_PIXELS, DIM_PIXELS), (255,255,255))
+        img = Image.new('RGB', (DIM_PIXELS, DIM_PIXELS), (255, 255, 255))
         # Loop over polygon masks
         for polygon in grouped_tiles[key]:
             # Convert list enclosed within string to list
             list_polygon = eval(polygon)
             # Fill polygon
-            ImageDraw.Draw(img).polygon(list_polygon, outline=0, fill=(0, 0, 0))
+            ImageDraw.Draw(img).polygon(list_polygon, outline=0,
+                                        fill=(0, 0, 0))
         mask = np.array(img)
 
         # Save binary mask images
