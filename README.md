@@ -1,5 +1,7 @@
 ## Introduction
-In this repository, an approach is implemented to detect and geolocate houseboats based on high resolution aerial/satellite images. 
+In this repository, an approach is implemented to detect and geolocate houseboats based on high resolution aerial/satellite images.  
+
+For a quick dive into this repository take a look at the [complete solution notebook](Complete%20solution.ipynb).
 
 ## Map tile structure
 Information regarding the tile structure used at [data.amsterdam.nl](https://t1.data.amsterdam.nl/lufo2020_RD/13/3810/4315.jpeg) is available here: https://www.geonovum.nl/uploads/standards/downloads/nederlandse_richtlijn_tiling_-_versie_1.1.pdf
