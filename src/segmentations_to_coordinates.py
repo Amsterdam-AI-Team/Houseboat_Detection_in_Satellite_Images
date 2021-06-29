@@ -54,17 +54,11 @@ def _minimum_area_rectangle(polygon_tuple):
     return round(width_meters, 3), round(length_meters, 3)
 
 
-def segmentations_to_coordinates(in_file, out_folder):
+def segmentations_to_coordinates(in_file, out_file):
     """
     Get the dimensions of a detected houseboat in meters and get the
     Rijksdriehoek coordinates of the center of the detected houseboat.
     """
-
-    # Create a directory, first check if it already exists
-    if not os.path.exists(out_folder):
-        os.makedirs(out_folder)
-    else:
-        print("Output folder already exists.")
 
     rows_list = []
 
@@ -96,6 +90,4 @@ def segmentations_to_coordinates(in_file, out_folder):
 
     # Save this file
     df = pd.DataFrame(rows_list)
-    compression_opts = dict(method="zip", archive_name="houseboat_polygon_data.csv")
-    df.to_csv(os.path.join(out_folder, "houseboat_polygon_data.zip"),
-              index=False, compression=compression_opts)
+    df.to_csv(out_file, index=False)
