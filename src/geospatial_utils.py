@@ -4,6 +4,7 @@ from shapely.geometry import Polygon
 import csv
 import pandas as pd
 import cv2
+import json
 
 DIM_PIXELS = 256  # The width and height value at zoom level 13
 DIM_METERS = 107.52  # The width and height value at zoom level 13
@@ -33,12 +34,11 @@ def _get_left_below_tile_coordinates(tile_x_y):
     return tile_x, tile_y
 
 
-def _get_rijksdriehoek_coordinates(tile_coordinates, instance_center):
+def _get_rijksdriehoek_coordinates(tile_coordinates, x_coord, y_coord):
     """ Convert the pixel coordinates to Rijksdriehoek coordinates """
-    instance_x = tile_coordinates[0] + (PIXEL_IN_METERS * instance_center.x)
-    instance_y = tile_coordinates[1] + (PIXEL_IN_METERS * (256 -
-                                                           instance_center.y))
-    return [round(instance_x, 3), round(instance_y, 3)]
+    rd_x = tile_coordinates[0] + (PIXEL_IN_METERS * x_coord)
+    rd_y = tile_coordinates[1] + (PIXEL_IN_METERS * (DIM_PIXELS - y_coord))
+    return [round(rd_x, 3), round(rd_y, 3)]
 
 
 def _minimum_area_rectangle(polygon_tuple):
@@ -81,7 +81,7 @@ def segmentations_to_coordinates(in_file, out_file):
             instance_center = _get_polygon_center(polygon_data["mask"])
             tile_coordinates = _get_left_below_tile_coordinates(polygon_data["tile_x_y"])
             polygon_data["center_mask"] = _get_rijksdriehoek_coordinates(tile_coordinates,
-                                                                         instance_center)
+                                                                         instance_center.x, instance_center.y)
 
             # Get width and length of polygon using rotated minumum bounding rectangle
             polygon_data["width"], polygon_data["length"] = _minimum_area_rectangle(polygon_data["mask"])
@@ -91,3 +91,45 @@ def segmentations_to_coordinates(in_file, out_file):
     # Save this file
     df = pd.DataFrame(rows_list)
     df.to_csv(out_file, index=False)
+
+def data_to_geojson(in_file, out_file):
+    """ Polygon data from csv file to geosjon format. """
+    geos = []
+
+    # Iterate over csv
+    with open(in_file, "r") as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
+        next(csvfile)  # skip the first line
+        for row in csvreader:
+            # Read the polygon columns
+            polygon = eval(row[1])
+
+            rd_polygon_list = []
+            tile_coordinates = _get_left_below_tile_coordinates(row[0])
+            for xy in polygon:
+                xy_rd = _get_rijksdriehoek_coordinates(tile_coordinates, xy[0], xy[1])
+                rd_polygon_list.append(xy_rd)
+
+
+            poly = {
+                'type': 'Polygon',
+                'coordinates': [rd_polygon_list]
+            }
+
+            geometry = {
+                'geometry': poly
+            }
+
+            geos.append(geometry)
+
+
+    geojson_dict = {
+        'type': 'FeatureCollection',
+        'features': geos,
+    }
+
+    # Save the geosjon file
+    with open(out_file, 'w') as f:
+        json.dump(geojson_dict, f)
+
+
