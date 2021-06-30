@@ -81,7 +81,8 @@ def segmentations_to_coordinates(in_file, out_file):
             instance_center = _get_polygon_center(polygon_data["mask"])
             tile_coordinates = _get_left_below_tile_coordinates(polygon_data["tile_x_y"])
             polygon_data["center_mask"] = _get_rijksdriehoek_coordinates(tile_coordinates,
-                                                                         instance_center.x, instance_center.y)
+                                                                         instance_center.x,
+                                                                         instance_center.y)
 
             # Get width and length of polygon using rotated minumum bounding rectangle
             polygon_data["width"], polygon_data["length"] = _minimum_area_rectangle(polygon_data["mask"])
@@ -91,6 +92,7 @@ def segmentations_to_coordinates(in_file, out_file):
     # Save this file
     df = pd.DataFrame(rows_list)
     df.to_csv(out_file, index=False)
+
 
 def data_to_geojson(in_file, out_file):
     """ Polygon data from csv file to geosjon format. """
@@ -107,9 +109,13 @@ def data_to_geojson(in_file, out_file):
             rd_polygon_list = []
             tile_coordinates = _get_left_below_tile_coordinates(row[0])
             for xy in polygon:
-                xy_rd = _get_rijksdriehoek_coordinates(tile_coordinates, xy[0], xy[1])
+                xy_rd = _get_rijksdriehoek_coordinates(tile_coordinates, xy[0],
+                                                       xy[1])
                 rd_polygon_list.append(xy_rd)
 
+            filename = {
+                'name': str(row[0])
+            }
 
             poly = {
                 'type': 'Polygon',
@@ -117,11 +123,11 @@ def data_to_geojson(in_file, out_file):
             }
 
             geometry = {
+                'properties': filename,
                 'geometry': poly
             }
 
             geos.append(geometry)
-
 
     geojson_dict = {
         'type': 'FeatureCollection',
@@ -131,5 +137,3 @@ def data_to_geojson(in_file, out_file):
     # Save the geosjon file
     with open(out_file, 'w') as f:
         json.dump(geojson_dict, f)
-
-
